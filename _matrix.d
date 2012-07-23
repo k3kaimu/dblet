@@ -1,4 +1,4 @@
-﻿module dblet.matrix;
+module dblet.matrix;
 
 import dblet.evalexpr.blas.lv1;
 import dblet.evalexpr.blas.lv2;
