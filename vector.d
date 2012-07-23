@@ -1,4 +1,4 @@
-﻿module dblet.vector;
+module dblet.vector;
 
 import scid.bindings.lapack.dlapack;
 import scid.bindings.blas.dblas;
@@ -20,7 +20,7 @@ version(unittest){
 * Example:
 * ---------------------
 void main(){
-    Vector!double a;		//蜍慕噪縺ｪ繝吶け繝医Ν
+    Vector!double a;		//???
     
     assert(a.length == 0);
     
