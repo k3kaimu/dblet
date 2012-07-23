@@ -1,4 +1,4 @@
-module dblet.vector;
+﻿module dblet.vector;
 
 import scid.bindings.lapack.dlapack;
 import scid.bindings.blas.dblas;
@@ -16,11 +16,11 @@ version(unittest){
     import std.stdio;
 }
 
-/**ベクトル型
+/**繝吶け繝医Ν蝙・
 * Example:
 * ---------------------
 void main(){
-    Vector!double a;		//動的なベクトル
+    Vector!double a;		//蜍慕噪縺ｪ繝吶け繝医Ν
     
     assert(a.length == 0);
     
@@ -34,7 +34,7 @@ public:
     T[] array;
     alias T elementType;
     
-    /** コンストラクタ
+    /** 繧ｳ繝ｳ繧ｹ繝医Λ繧ｯ繧ｿ
      * Example:
      * ----------
      * auto ary = [0.1,0.2,0.3];
@@ -91,7 +91,7 @@ public:
         return (array[idx] = src);
     }
     
-//演算子オーバーロード
+//貍皮ｮ怜ｭ舌が繝ｼ繝舌・繝ｭ繝ｼ繝・
     auto opBinary(string s : "+", VType)(VType src)if(isVector!VType && is(T == VType.elementType))
     in{
         assert(this._dim == src._dim);
@@ -153,7 +153,7 @@ public:
     }
 }
 
-///線形代数 VectorのExpression Template実装
+///邱壼ｽ｢莉｣謨ｰ Vector縺ｮExpression Template螳溯｣・
 struct VectorExpr(alias Op, E, ArgT...){
 package:
     int _dim;
