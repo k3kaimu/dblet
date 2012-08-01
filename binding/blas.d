@@ -5,8 +5,10 @@
  */
 module dblet.binding.blas;
 
+import std.typetuple    : staticIndexOf;
+
 ///BLASの型.任意の型について設定します。
-template BlasTypes(S, D, C, Z, Ch, I)
+template Types(S, D, C, Z, Ch, I)
 {
     alias S Single;
     alias D Double;
@@ -17,12 +19,34 @@ template BlasTypes(S, D, C, Z, Ch, I)
 }
 
 ///ditto
-alias BlasTypes!(float, double, cfloat, cdouble, char, int) Blas;
+alias Types!(float, double, cfloat, cdouble, char, int) Blas;
 
-///BLAS型かどうかを判定します
-template isBlasType(T){
-    enum isBlasType = is(T == Blas.Single) || is(T == Blas.Double) ||
-                      is(T == Blas.SCmplx) || is(T == Blas.DCmplx);
+///ditto
+alias TypeTuple!(Blas.Single, Blas.Double,
+                 Blas.SCmplx, Blas.DCmplx) BlasTypes;
+
+///Tに対応する実数型
+template RealType(T){
+    static if(is(T == Blas.SCmplx))
+        alias Blas.Single RealType;
+    else static if(is(T == Blas.DCmplx))
+        alias Blas.Double RealType;
+    else
+        alias T RealType;
+}
+
+//関数についてパターンマッチを行う
+private template PatternMatch(fun...){
+    static if(fun.length){
+        auto PatternMatch(T...)(T args){
+            static if(is(typeof(fun[0](args))))
+                return fun[0](args);
+            else
+                return .PatternMatch!(fun[1..$])(args);
+        }
+    }else{
+        static assert(0, "Cannot match for patterns");
+    }
 }
 
 extern(C):
@@ -43,6 +67,16 @@ Blas.Double  dasum_(Blas.Int* n, Blas.Double* x, Blas.Int* incx);   ///ditto
 Blas.Single scasum_(Blas.Int* n, Blas.SCmplx* x, Blas.Int* incx);   ///ditto
 Blas.Double dzasum_(Blas.Int* n, Blas.DCmplx* x, Blas.Int* incx);   ///ditto
 
+///ditto
+alias PatternMatch!(sasum_, dasum_, scasum_, dzasum_) asum_;
+
+///ditto
+auto asum(T)(Blas.Int n, T[] x, Blas.Int incx)
+if(staticIndexOf!(T, BlasTypes) != -1)
+{
+    return asum_(&n, x.ptr, &incx);
+}
+
 
 /** 以下の式のように、ベクトルxにスカラーaをかけ、ベクトルyに加算します。
  * y := a * x + y
@@ -61,6 +95,16 @@ void daxpy_(Blas.Int* n, Blas.Double* a, Blas.Double* x, Blas.Int* incx, Blas.Do
 void caxpy_(Blas.Int* n, Blas.SCmplx* a, Blas.SCmplx* x, Blas.Int* incx, Blas.SCmplx* y, Blas.Int* incy);   ///ditto
 void zaxpy_(Blas.Int* n, Blas.DCmplx* a, Blas.DCmplx* x, Blas.Int* incx, Blas.DCmplx* y, Blas.Int* incy);   ///ditto
 
+///ditto
+alias PatternMatch!(saxpy_, daxpy_, caxpy_, zaxpy_) axpy_;
+
+///ditto
+void axpy(T)(Blas.Int n, T[] a, T[] x, Blas.Int incx, T[] y, Blas.Int incy)
+if(staticIndexOf!(T, BlasTypes) != -1)
+{
+    axpy_(&n, a.ptr, x.ptr, &incx, y.ptr, incy);
+}
+
 
 /** ベクトルxをベクトルyにコピーします。
  * y = x
@@ -77,6 +121,16 @@ void scopy_(Blas.Int* n, Blas.Single* x, Blas.Int* incx, Blas.Single* y, Blas.In
 void dcopy_(Blas.Int* n, Blas.Double* x, Blas.Int* incx, Blas.Double* y, Blas.Int* incy);   ///ditto
 void ccopy_(Blas.Int* n, Blas.SCmplx* x, Blas.Int* incx, Blas.SCmplx* y, Blas.Int* incy);   ///ditto
 void zcopy_(Blas.Int* n, Blas.DCmplx* x, Blas.Int* incx, Blas.DCmplx* y, Blas.Int* incy);   ///ditto
+
+///ditto
+alias PatternMatch!(scopy_, dcopy_, ccopy_, zcopy_) copy_;
+
+///ditto
+void copy(T)(Blas.Int n, T[] x, Blas.Int incx, T[] y, Blas.Int incy)
+if(staticIndexOf!(T, BlasTypes) != -1)
+{
+    copy_(&n, x.ptr, &incx, y.ptr, &incy);
+}
 
 
 /** 2ベクトルx, yのドット積を計算します。
@@ -95,6 +149,17 @@ Blas.Double  ddot_(Blas.Int* n, Blas.Double* x, Blas.Int* incx, Blas.Double* y, 
 Blas.SCmplx cdotu_(Blas.Int* n, Blas.SCmplx* x, Blas.Int* incx, Blas.SCmplx* y, Blas.Int* incy);    ///ditto
 Blas.DCmplx zdotu_(Blas.Int* n, Blas.DCmplx* x, Blas.Int* incx, Blas.DCmplx* y, Blas.Int* incy);    ///ditto
 
+///ditto
+alias PatternMatch!(sdot_, ddot_, cdotu_, zdotu_) dot_;
+
+///ditto
+T dot(T)(Blas.Int n, T[] x, Blas.Int incx, T[] y, Blas.Int incy)
+if(staticIndexOf!(T, BlasTypes) != -1)
+{
+    return dot_(&n, x.ptr, &incx, y.ptr, &incy);
+}
+
+
 /** ベクトルxの共役とベクトルyのドット積を計算します。
  * result = Σ(conjg(x)*y)
  * 
@@ -109,6 +174,17 @@ Blas.DCmplx zdotu_(Blas.Int* n, Blas.DCmplx* x, Blas.Int* incx, Blas.DCmplx* y, 
 Blas.SCmplx cdotc_(Blas.Int* n, Blas.SCmplx* x, Blas.Int* incx, Blas.SCmplx* y, Blas.Int* incy);
 Blas.DCmplx zdotc_(Blas.Int* n, Blas.DCmplx* x, Blas.Int* incx, Blas.DCmplx* y, Blas.Int* incy);    ///ditto
 
+///ditto
+alias PatternMatch!(cdotc_, zdotc_) dotc_;
+
+///ditto
+T dot(T)(Blas.Int n, T[] x, Blas.Int incx, T[] y, Blas.Int incy)
+if(staticIndexOf!(T, BlasTypes[2..$]) != -1)
+{
+    return dotc_(&n, x.ptr, &incx, y.ptr, &incy);
+}
+
+
 /** ベクトルxのユークリッド・ノルムを計算します。
  * result = ||x||2 = √( Σ( |x[i]| ^^ 2) )
  * 
@@ -122,6 +198,16 @@ Blas.Single  snrm2_(Blas.Int* n, Blas.Single* x, Blas.Int* incx);
 Blas.Double  dnrm2_(Blas.Int* n, Blas.Double* x, Blas.Int* incx);   ///ditto
 Blas.Single scnrm2_(Blas.Int* n, Blas.SCmplx* x, Blas.Int* incx);   ///ditto
 Blas.Double dznrm2_(Blas.Int* n, Blas.DCmplx* x, Blas.Int* incx);   ///ditto
+
+///ditto
+alias PatternMatch!(snrm2_, dnrm2_, scnrm2_, dznrm2_) nrm2_;
+
+///ditto
+auto nrm2(T)(Blas.Int n, T[] x, Blas.Int incx)
+if(staticIndexOf!(T, BlasTypes) != -1)
+{
+    return nrm2_(&n, x.ptr, &incx);
+}
 
 
 /** ベクトルxとベクトルyで、点pを p[i] = (x[i], y[i]) と表し、c = cosθ, s = sinθとなるθだけ、各p点を回転させます。式で表すと以下のようになります。
@@ -143,6 +229,17 @@ void  drot_(Blas.Int* n, Blas.Double* x, Blas.Int* incx, Blas.Double* y, Blas.In
 void csrot_(Blas.Int* n, Blas.SCmplx* x, Blas.Int* incx, Blas.SCmplx* y, Blas.Int* incy, Blas.Single* c, Blas.Single* s);   ///ditto
 void zdrot_(Blas.Int* n, Blas.DCmplx* x, Blas.Int* incx, Blas.DCmplx* y, Blas.Int* incy, Blas.Double* c, Blas.Double* s);   ///ditto
 
+///ditto
+alias PatternMatch!(srot_, drot_, csrot_, zdrot_) rot_;
+
+///ditto
+void rot(T, U : RealType!T)(Blas.Int n, T[] x, Blas.Int incx, T[] y, Blas.Int incy, U c, U s)
+if(staticIndexOf!(T, BlasTypes) != -1)
+{
+    rot_(&n, x.ptr, &incx, y.ptr, &incy, &c, &s);
+}
+
+
 /** 点p(a, b)を与えたとき、この点をGivens回転させた結果のy座標が0になるような各パラメータa, b, c, sを計算します。
  * r = ||(a, b)||
  * c * a + s * b = r
@@ -161,16 +258,49 @@ void zdrot_(Blas.Int* n, Blas.DCmplx* x, Blas.Int* incx, Blas.DCmplx* y, Blas.In
  */
 void srotg_(Blas.Single* a, Blas.Single* b, Blas.Single* c, Blas.Single* s);
 void drotg_(Blas.Double* a, Blas.Double* b, Blas.Double* c, Blas.Double* s);    ///ditto
-void crotg_(Blas.SCmplx* a, Blas.SCmplx* b, Blas.Single* c, Blas.SCmplx* s);    ///ditto
-void zrotg_(Blas.DCmplx* a, Blas.DCmplx* b, Blas.Double* c, Blas.DCmplx* s);    ///ditto
+void crotg_(Blas.SCmplx* a, Blas.SCmplx* b, Blas.Single* c, Blas.Single* s);    ///ditto
+void zrotg_(Blas.DCmplx* a, Blas.DCmplx* b, Blas.Double* c, Blas.Double* s);    ///ditto
+
+///ditto
+alias PatternMatch!(srotg_, drotg_, crotg_, zrotg_) rotg_;
+
+///ditto
+void rotg(T, U : RealType!T)(ref T a, ref T b, ref U c, ref U s)
+if(staticIndexOf!(T, BlasTypes) != -1)
+{
+    rotg_(&a, &b, &s, &c);
+}
+
 
 ///変形面における点の回転を実行する。
 void srotm_(Blas.Int* n, Blas.Single* x, Blas.Int* incx, Blas.Single* y, Blas.Int* incy, Blas.Single* param);
 void drotm_(Blas.Int* n, Blas.Double* x, Blas.Int* incx, Blas.Double* y, Blas.Int* incy, Blas.Double* param);   ///ditto
 
+///ditto
+alias PatternMatch!(srotm_, drotm_) rotm_;
+
+///ditto
+void rotm(T)(Blas.Int n, T[] x, Blas.Int incx, T[] y, Blas.Int incy, ref Blas.Single[5] param)
+if(staticIndexOf!(T, BlasTypes) != -1)
+{
+    rotm_(&n, x.ptr, &incx, y.ptr, &incy, param.ptr);
+}
+
+
 /// Givens回転に対する変形パラメータを計算する。
-void drotmg_(Blas.Double* d1, Blas.Double* d2, Blas.Double* b1, Blas.Double* b2, Blas.Double* param);
-void srotmg_(Blas.Single* d1, Blas.Single* d2, Blas.Single* b1, Blas.Single* b2, Blas.Single* param);   ///ditto
+void srotmg_(Blas.Single* d1, Blas.Single* d2, Blas.Single* b1, Blas.Single* b2, Blas.Single* param);
+void drotmg_(Blas.Double* d1, Blas.Double* d2, Blas.Double* b1, Blas.Double* b2, Blas.Double* param);   ///ditto
+
+
+///ditto
+alias PatternMatch!(srotmg_, drotmg_) rotmg_;
+
+///ditto
+void rotmg(T)(T d1, T d2, T b1, T b2, ref T[5] param)
+{
+    rotmg_(&d1, &d2, &b1, &b2, param.ptr);
+}
+
 
 ///ベクトルとスカラーの積を計算する。
 void  sscal_(Blas.Int* n, Blas.Single* alpha, Blas.Single* x, Blas.Int* incx);
@@ -180,11 +310,33 @@ void csscal_(Blas.Int* n, Blas.Single* alpha, Blas.SCmplx* x, Blas.Int* incx);  
 void  zscal_(Blas.Int* n, Blas.DCmplx* alpha, Blas.DCmplx* x, Blas.Int* incx);  ///ditto
 void zdscal_(Blas.Int* n, Blas.Double* alpha, Blas.DCmplx* x, Blas.Int* incx);  ///ditto
 
+///ditto
+alias PatternMatch!(sscal_, dscal_, cscal_, csscal_, zscal_, zdscal_) scal_;
+
+///ditto
+void scal(T, U)(Blas.Int n, T alpha, U[] x, Blas.Int incx)
+if(staticIndexOf!(T, BlasTypes) != -1 && staticIndexOf!(U, BlasTypes))
+{
+    scal_(&n, &alpha, x.ptr, &incx);
+}
+
+
 ///ベクトルを他のベクトルと交換する。
 void sswap_(Blas.Int* n, Blas.Single* x, Blas.Int* incx, Blas.Single* y, Blas.Int* incy);
 void dswap_(Blas.Int* n, Blas.Double* x, Blas.Int* incx, Blas.Double* y, Blas.Int* incy);   ///ditto
 void cswap_(Blas.Int* n, Blas.SCmplx* x, Blas.Int* incx, Blas.SCmplx* y, Blas.Int* incy);   ///ditto
 void zswap_(Blas.Int* n, Blas.DCmplx* x, Blas.Int* incx, Blas.DCmplx* y, Blas.Int* incy);   ///ditto
+
+///ditto
+alias PatternMatch!(sswap_, dswap_, cswap_, zswap_) swap_;
+
+///ditto
+void swap(T)(Blas.Int n, T[] x, Blas.Int incx, T[] y, Blas.Int incy)
+if(staticIndexOf!(T, BlasTypes) != -1)
+{
+    swap_(&n, x.ptr, &incx, y.ptr, &incy);
+}
+
 
 ///最大絶対値を持つベクトル成分x[i]の位置を返す。複素ベクトルの場合は最大合計 |Re{x[i]}| + |Im{x[i]}| を持つ成分の位置を返す。
 Blas.Int isamax_(Blas.Int* n, Blas.Single* x, Blas.Int* incx);
@@ -192,11 +344,32 @@ Blas.Int idamax_(Blas.Int* n, Blas.Double* x, Blas.Int* incx);  ///ditto
 Blas.Int icamax_(Blas.Int* n, Blas.SCmplx* x, Blas.Int* incx);  ///ditto
 Blas.Int izamax_(Blas.Int* n, Blas.DCmplx* x, Blas.Int* incx);  ///ditto
 
+///ditto
+alias PatternMatch!(isamax_, idamax_, icamax_, izamax_) iamax_;
+
+///ditto
+Blas.Int iamax(T)(Blas.Int n, T[] x, Blas.Int incx)
+if(staticIndexOf!(T, BlasTypes) != -1)
+{
+    return iamax_(&n, x.ptr, &incx);
+}
+
+
 ///最小絶対値を持つベクトル成分x[i]の位置を返す。複素ベクトルの場合は最小合計 |Re{x[i]}| + |Im{x[i]}| を持つ成分の位置を返す。
 Blas.Int isamax_(Blas.Int* n, Blas.Single* x, Blas.Int* incx);
 Blas.Int idamax_(Blas.Int* n, Blas.Double* x, Blas.Int* incx);  ///ditto
 Blas.Int icamax_(Blas.Int* n, Blas.SCmplx* x, Blas.Int* incx);  ///ditto
 Blas.Int izamax_(Blas.Int* n, Blas.DCmplx* x, Blas.Int* incx);  ///ditto
+
+///ditto
+alias PatternMatch!(isamin_, idamin_, icamin_, izamin_) iamin_;
+
+///ditto
+Blas.Int iamin(T)(Blas.Int n, T[] x, Blas.Int incx)
+if(staticIndexOf!(T, BlasTypes) != -1)
+{
+    return iamin_(&n, x.ptr, &incx);
+}
 
 
 //level 2
