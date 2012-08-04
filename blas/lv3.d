@@ -1,3 +1,8 @@
+/** BLAS Level 3 について本ライブラリとBLASを結びつけるためのモジュールです
+ * Authors: Kazuki Komatsu (k3kaimu)
+ * License: NYSL
+ */
+
 module dblet.blas.lv3;
 
 import dblet.traits;

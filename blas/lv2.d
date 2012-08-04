@@ -1,3 +1,8 @@
+/** BLAS Level 2 について本ライブラリとBLASを結びつけるためのモジュールです
+ * Authors: Kazuki Komatsu (k3kaimu)
+ * License: NYSL
+ */
+
 module dblet.blas.lv2;
 
 static import dblas = scid.bindings.blas.dblas;

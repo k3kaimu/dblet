@@ -1,5 +1,7 @@
-/** 連立一次方程式をときます
-*/
+/** 連立一次方程式を解くモジュール
+ * Authors: Kazuki Komatsu (k3kaimu)
+ * License: NYSL
+ */
 
 module dblet.lapack.trs;
 

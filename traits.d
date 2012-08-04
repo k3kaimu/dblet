@@ -1,3 +1,8 @@
+/** BLASやLAPACKやベクトル,行列型の特性を調べます
+ * Authors: Kazuki Komatsu (k3kaimu)
+ * License: NYSL
+ */
+
 module dblet.traits;
 
 import std.traits;

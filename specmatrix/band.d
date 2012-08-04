@@ -1,3 +1,7 @@
+/** 帯行列(バンドマトリックス)を操作するためのモジュールです
+ * Authors: Kazuki Komatsu (k3kaimu)
+ * License: NYSL
+ */
 module dblet.specmatrix.band;
 
 struct BandMatrix(E){

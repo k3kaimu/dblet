@@ -1,3 +1,8 @@
+/** ベクトル,行列演算を行うためのライブラリ
+ * Authors: Kazuki Komatsu (k3kaimu)
+ * License: NYSL
+ */
+
 module dblet.all;
 
 import dblet.blas.lv1,

@@ -1,3 +1,8 @@
+/** Tupleを扱うためのライブラリ
+ * Authors: Kazuki Komatsu (k3kaimu)
+ * License: NYSL
+ */
+
 module dblet.tuple;
 
 public import std.typecons;

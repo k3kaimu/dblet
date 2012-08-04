@@ -1,5 +1,7 @@
-/*一般的なベクトルに対する操作を提供します
-*/
+/** ベクトルを扱います
+ * Authors: Kazuki Komatsu (k3kaimu)
+ * License: NYSL
+ */
 
 module dblet.vector;
 

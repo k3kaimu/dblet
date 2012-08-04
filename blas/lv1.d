@@ -1,3 +1,8 @@
+/** BLAS Level 1 についてライブラリとBLASを結びつけるためのモジュールです
+ * Authors: Kazuki Komatsu (k3kaimu)
+ * License: NYSL
+ */
+
 module dblet.blas.lv1;
 
 import std.typecons : tuple;

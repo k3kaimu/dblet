@@ -1,3 +1,8 @@
+/** BLAS Level 2 についてExpression Templateを作るモジュールです
+ * Authors: Kazuki Komatsu (k3kaimu)
+ * License: NYSL
+ */
+
 module dblet.evalexpr.blas.lv2;
 
 static import ablas = dblet.blas.lv2;

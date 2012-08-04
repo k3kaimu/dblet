@@ -1,3 +1,8 @@
+/** 一般行列を扱うためのモジュール
+ * Authors: Kazuki Komatsu (k3kaimu)
+ * License: NYSL
+ */
+
 module dblet.matrix;
 
 import dblet.evalexpr.blas.lv1;

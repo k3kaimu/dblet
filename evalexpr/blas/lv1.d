@@ -1,3 +1,8 @@
+/** BLAS Level 1 についてExpression Templateを作るモジュールです
+ * Authors: Kazuki Komatsu (k3kaimu)
+ * License: NYSL
+ */
+
 module dblet.evalexpr.blas.lv1;
 
 import ablaslv1 = dblet.blas.lv1;

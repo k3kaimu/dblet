@@ -1,5 +1,7 @@
-/** 行列をLU分解するためのモジュールです
-*/
+/** 行列をLU分解するためのモジュール
+ * Authors: Kazuki Komatsu (k3kaimu)
+ * License: NYSL
+ */
 
 module dblet.lapack.trf;
 

@@ -1,5 +1,7 @@
-/**逆行列を計算します。
-*/
+/** 逆行列を計算するためのモジュール
+ * Authors: Kazuki Komatsu (k3kaimu)
+ * License: NYSL
+ */
 
 module dblet.lapack.tri;
 
